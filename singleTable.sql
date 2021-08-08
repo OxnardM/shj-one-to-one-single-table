@@ -1,3 +1,5 @@
+-- second commit test
+
 drop table repository_type cascade constraints purge;
 drop table tst_ste cascade constraints purge;
 
