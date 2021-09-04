@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.tomcat.util.log.SystemLogHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,6 +23,7 @@ import demo.model.OtherRepo;
 import demo.model.TstSte;
 import demo.service.LdRnEntService;
 import demo.service.TstSteService;
+import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -30,18 +33,29 @@ import io.cucumber.java.en.Then;
  * 
  */
 public class LoadAndGet extends SpringIntegrationTest {
+  private static final Logger LOGGER = LoggerFactory.getLogger(LoadAndGet.class);
   private static final String SCHEME = "http:"; 
   private Integer tsId;
   
   @Autowired LdRnEntService ldRnEntService;
   @Autowired TstSteService tstSteService;
   
-  @Given("^load of LdRnEnt \"(.*)\" \"(.*)\" \"(.*)\"") // do like this or double quotes get loaded
-  public void loadOfLdRnEnt(String name, String domain, String project) throws Throwable {
-    System.out.println(String.format("(loadOfLdRnEnt) starting [name => %s, domain => %s project => %s]", name, domain, project));
+  @ParameterType("0|1|true|True|TRUE|false|False|FALSE")
+  public Boolean booleanValue(String s) {
+    return new Boolean(s);
+  }
+  
+  
+  @Given("load of LdRnEnt {string} {string} {string} {booleanValue} {string} {string} {string}") // do like this or double quotes get loaded
+  public void loadOfLdRnEnt(String name, String app, String description, Boolean active, String starter, String domain, String project) throws Throwable {
+    LOGGER.info(String.format("(loadOfLdRnEnt) starting [name=%s, active=%s, domain=%s, project=%s]", name, active, domain, project));
     
     TstSte tstSte = new TstSte.Builder()
         .name(name)
+        .app(app)
+        .description(description)
+        .active(active)
+        .starter(starter)
         .build();
     
     LdRnEnt ldRnEnt = new LdRnEnt.Builder()
@@ -55,9 +69,9 @@ public class LoadAndGet extends SpringIntegrationTest {
     tstSteService.persist(tstSte);
   }
   
-  @Then("^LdRnEnt in db no arguments \"(.*)\" \"(.*)\" \"(.*)\"") // do like this or double quotes will be there
-  public void ldRnEntInDbNoArguments(String name, String domain, String project) throws Throwable {
-    System.out.println(String.format("(ldRnEntInDbNoArguments) starting [name => %s, domain => %s project => %s]", name, domain, project));
+  @Then("LdRnEnt in db no arguments {string} {string} {string} {booleanValue} {string} {string} {string}") // do like this or double quotes will be there
+  public void ldRnEntInDbNoArguments(String name, String app, String description, Boolean active, String starter, String domain, String project) throws Throwable {
+    LOGGER.info(String.format("(ldRnEntInDbNoArguments) starting [name => %s, domain => %s project => %s]", name, domain, project));
     
     assertTrue(
         tstSteService.tstStes(new TstSte()).stream().anyMatch(x -> x.getName().equals(name) &&
@@ -67,11 +81,15 @@ public class LoadAndGet extends SpringIntegrationTest {
     );
   }
   
-  @Given("^load of OtherRepo \"(.*)\" \"(.*)\" \"(.*)\"") // do like this or double quotes will surround the value
-  public void loadOfOtherRepo(String name, String domain, String url) throws Throwable {
+  @Given("load of OtherRepo {string} {string} {string} {booleanValue} {string} {string} {string}") // do like this or double quotes will surround the value
+  public void loadOfOtherRepo(String name, String app, String description, Boolean active, String starter, String domain, String url) throws Throwable {
     
     TstSte tstSte = new TstSte.Builder()
         .name(name)
+        .app(app)
+        .description(description)
+        .active(active)
+        .starter(starter)
         .build();
     
     OtherRepo otherRepo = new OtherRepo.Builder()
@@ -85,8 +103,8 @@ public class LoadAndGet extends SpringIntegrationTest {
     tstSteService.persist(tstSte);
   }
   
-  @Then("^OtherRepo in db no arguments \"(.*)\" \"(.*)\" \"(.*)\"") // do like this or double quotes will surround the value
-  public void otherRepoInDbNoArguments(String name, String domain, String url) throws Throwable {
+  @Then("OtherRepo in db no arguments {string} {string} {string} {booleanValue} {string} {string} {string}") // do like this or double quotes will surround the value
+  public void otherRepoInDbNoArguments(String name, String app, String description, Boolean active, String starter, String domain, String url) throws Throwable {
     
     assertTrue(
         tstSteService.tstStes(new TstSte()).stream().anyMatch(x -> x.getName().equals(name) &&
@@ -96,8 +114,8 @@ public class LoadAndGet extends SpringIntegrationTest {
         );
   }
   
-  @Given("^load of LdRnEnt using JSON \"(.*)\" \"(.*)\" \"(.*)\"")
-  public void loadOfLdRnEntUsingJson(String name, String domain, String project) throws Throwable {
+  @Given("load of LdRnEnt using JSON {string} {string} {string} {booleanValue} {string} {string} {string}")
+  public void loadOfLdRnEntUsingJson(String name, String app, String description, Boolean active, String starter, String domain, String project) throws Throwable {
     System.out.println(String.format("(loadOfLdRnEntUsingJson) starting [name => %s, domain => %s project => %s]", name, domain, project));
     // if need to divide more see: https://docs.oracle.com/javase/8/docs/api/java/net/URI.html
     URI url = new URI(SCHEME + "//localhost:8080/tstSte");
@@ -114,8 +132,8 @@ public class LoadAndGet extends SpringIntegrationTest {
     );
   }
 
-  @Then("^LdRnEnt in db no arguments using JSON \"(.*)\" \"(.*)\" \"(.*)\"") // do like this or double quotes will be there
-  public void ldRnEntInDbNoArgumentsUsingJson(String name, String domain, String project) throws Throwable {
+  @Then("LdRnEnt in db no arguments using JSON {string} {string} {string} {booleanValue} {string} {string} {string}") // do like this or double quotes will be there
+  public void ldRnEntInDbNoArgumentsUsingJson(String name, String app, String description, Boolean active, String starter, String domain, String project) throws Throwable {
     System.out.println(String.format("(ldRnEntInDbNoArgumentsUsingJson) starting [name => %s, domain => %s project => %s]", name, domain, project));
     URI url = new URI(SCHEME + "//localhost:8080/tstSte");
     executeGet(url, Optional.empty());
@@ -130,8 +148,8 @@ public class LoadAndGet extends SpringIntegrationTest {
     );
   }
   
-  @Given("^load of OtherRepo using JSON \"(.*)\" \"(.*)\" \"(.*)\"")
-  public void loadOfOtherRepoUsingJson(String name, String domain, String url) throws Throwable {
+  @Given("load of OtherRepo using JSON {string} {string} {string} {booleanValue} {string} {string} {string}")
+  public void loadOfOtherRepoUsingJson(String name, String app, String description, Boolean active, String starter, String domain, String url) throws Throwable {
     System.out.println(String.format("(loadOfOtherRepoUsingJson) starting [name => %s, domain => %s url => %s]", name, domain, url));
     // if need to divide more see: https://docs.oracle.com/javase/8/docs/api/java/net/URI.html
     URI url01 = new URI(SCHEME + "//localhost:8080/tstSte");
@@ -149,8 +167,8 @@ public class LoadAndGet extends SpringIntegrationTest {
         );
   }
   
-  @Then("^OtherRepo in db no arguments using JSON \"(.*)\" \"(.*)\" \"(.*)\"") // do like this or double quotes will be there
-  public void otherRepoInDbNoArgumentsUsingJson(String name, String domain, String url) throws Throwable {
+  @Then("OtherRepo in db no arguments using JSON {string} {string} {string} {booleanValue} {string} {string} {string}") // do like this or double quotes will be there
+  public void otherRepoInDbNoArgumentsUsingJson(String name, String app, String description, Boolean active, String starter, String domain, String url) throws Throwable {
     System.out.println(String.format("(ldRnEntInDbNoArgumentsUsingJson) starting [name => %s, domain => %s url => %s]", name, domain, url));
     URI url01 = new URI(SCHEME + "//localhost:8080/tstSte");
     executeGet(url01, Optional.empty());
@@ -165,8 +183,8 @@ public class LoadAndGet extends SpringIntegrationTest {
     
   }
   
-  @And("^OtherRepo by Test Suite key JSON \"(.*)\" \"(.*)\" \"(.*)\"")
-  public void otherRepoByTestSuiteKeyJson(String name, String domain, String url) throws Throwable {
+  @And("OtherRepo by Test Suite key JSON {string} {string} {string} {booleanValue} {string} {string} {string}")
+  public void otherRepoByTestSuiteKeyJson(String name, String app, String description, Boolean active, String starter, String domain, String url) throws Throwable {
     System.out.println(String.format("(otherRepoByTestSuiteKeyJson) starting [tsId = %s]", tsId));
     URI url01 = new URI(SCHEME + "//localhost:8080/tstSte/tstSte?tsId=" + tsId);
     executeGet(url01, Optional.empty());

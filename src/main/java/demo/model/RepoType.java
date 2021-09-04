@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 })
 //@DiscriminatorColumn(name="type", discriminatorType = DiscriminatorType.STRING, length=50) // use as cannot get access for toString
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class RepositoryType {
+public abstract class RepoType {
   
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -95,7 +95,7 @@ public abstract class RepositoryType {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    RepositoryType other = (RepositoryType) obj;
+    RepoType other = (RepoType) obj;
     if (id == null) {
       if (other.id != null)
         return false;

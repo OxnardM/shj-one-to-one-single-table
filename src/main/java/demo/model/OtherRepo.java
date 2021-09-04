@@ -10,7 +10,7 @@ import javax.persistence.Table;
 @Entity
 //@Table(name = "other_repo")
 //@DiscriminatorValue(value = "otherRepo") // no access to dtype
-public class OtherRepo extends RepositoryType {
+public class OtherRepo extends RepoType {
 
   @Column private String domain; // cannot set nullable = false as repository type table is set that way 
   @Column private String url;
